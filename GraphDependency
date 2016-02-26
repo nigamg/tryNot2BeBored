@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Stack;
 
 /**
-	 * graphSolution
-	 * @author nigamg
-	 *
-	 */
+ * 
+ * @author nigamg
+ *
+ */
 public class GraphSolution {
 	private final static String ARROW = "->";
 	private final static String FIRST_L = "|_ ";
@@ -173,7 +173,7 @@ public class GraphSolution {
 	        int i = 0;
 	        for (String child : children) {
 	        	String nextPrefix = (depth == ROOT) ? "" : (prefix + (leaf ? "   " : FIRST_PIPE+"  "));
-	            this.display(child, depth+1, nextPrefix, ++i == children.size());
+	            this.print(child, depth+1, nextPrefix, ++i == children.size());
 	        }
 	    }
 	    
