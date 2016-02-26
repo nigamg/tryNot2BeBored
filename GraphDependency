@@ -1,0 +1,197 @@
+package com.basics;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Stack;
+
+
+public class GraphSolution {
+	private final static String ARROW = "->";
+	private final static String FIRST_L = "|_ ";
+	private final static String FIRST_PIPE = "|";
+	
+	public static void main(String [] args){
+		
+		String [] input = {
+			"A->B",
+			"A->C", 
+			"B->C", 
+			"B->D"
+		};
+		
+		int parent = 0;
+		Tree tree = new GraphSolution.Tree();
+		for(String i : input){
+			String [] nodes = i.split(ARROW);
+			if(parent == 0){ // only once
+				tree.addNode(nodes[0]);
+				parent  = 1;
+			}
+			tree.addNode(nodes[0], nodes[1]);
+		}
+		// cover orphan child (left during traverse in the end)
+		Stack<String> traversL = tree.getTraverseLater();
+		if(traversL.size() > 0){
+			while(traversL.isEmpty()){
+				String dependency = traversL.pop();
+				if(dependency != null){
+					String [] nodes = dependency.split(ARROW);
+					tree.addNode(nodes[0], nodes[1]);
+				}
+			}
+		}
+		
+		System.out.println("==== for given sample input ====");
+		tree.display("A");
+		String [] testInput = {
+				"A->B",
+				"A->J",  
+				"B->C",
+				"B->D", 
+				"C->E",
+				"D->F",
+				"D->G",
+				"D->J",
+				"E->H",
+				"E->M",
+				"F->H",
+				"H->L",
+				"I->O",
+				"I->P",
+				"I->K",
+				"J->I",
+				"J->Q",
+				"K->N",
+				"K->L",
+				"L->I",
+				"M->N",
+				"M->H",
+				"O->P",
+				"P->Q"
+			};
+			
+			parent = 0;
+			Tree testTree = new GraphSolution.Tree();
+			for(String i : testInput){
+				String [] nodes = i.split(ARROW);
+				if(parent == 0){ // only once
+					testTree.addNode(nodes[0]);
+					parent  = 1;
+				}
+				testTree.addNode(nodes[0], nodes[1]);
+			}
+			
+			// cover orphan child (left during traverse in the end)
+			traversL = testTree.getTraverseLater();
+			if(traversL.size() > 0){
+				while(traversL.isEmpty()){
+					String dependency = traversL.pop();
+					if(dependency != null){
+						String [] nodes = dependency.split(ARROW);
+						tree.addNode(nodes[0], nodes[1]);
+					}
+				}
+			}
+			System.out.println("==== for given test input ====");
+			testTree.display("A");
+		
+	}
+	
+	/**
+	 * tree
+	 * @author nigamg
+	 *
+	 */
+	private static class Tree {
+
+	    private final static int ROOT = 0;
+
+	    private HashMap<String, Node> nodes;
+	   
+		private Stack<String> traverseLater;
+
+	    public Tree() {
+	        this.nodes = new HashMap<String, Node>();
+	        traverseLater = new Stack<>();
+	  
+	    }
+
+	    // Properties
+	    public HashMap<String, Node> getNodes() {
+	        return nodes;
+	    }
+
+	    // Public interface
+	    public Node addNode(String newNode) {
+	        return this.addNode(null, newNode);
+	    }
+
+	    public Node addNode(String parent, String newNode) {
+	        Node node = new Node(newNode);
+	        nodes.put(newNode, node);
+
+	        if (parent != null) {
+	        	if(nodes.get(parent) != null){
+	        		nodes.get(parent).addChild(newNode);
+	        	}else{
+	        		traverseLater.push(parent+ARROW+newNode);
+	        	}
+	        }
+
+	        return node;
+	    }
+
+	    public void display(String newNode) {
+	        this.display(newNode, ROOT, "", true);
+	    }
+	    
+	    public void display(String newNode, int depth, String prefix, boolean leaf) {
+	        ArrayList<String> children = nodes.get(newNode).getChildren();
+
+	        if (depth == ROOT) {
+	            System.out.println(nodes.get(newNode).getRoot());
+	        }else{
+	        	System.out.println(prefix+FIRST_L+nodes.get(newNode).getRoot());
+	        }
+
+	        
+	        int i = 0;
+	        for (String child : children) {
+	        	String nextPrefix = (depth == ROOT) ? "" : (prefix + (leaf ? "   " : FIRST_PIPE+"  "));
+	            this.display(child, depth+1, nextPrefix, ++i == children.size());
+	        }
+	    }
+	    
+	    public Stack<String> getTraverseLater() {
+			return traverseLater;
+		}
+	}
+	
+	/**
+	 * Node class
+	 * @author nigamg
+	 *
+	 */
+	private static class Node {
+		
+	    private ArrayList<String> children;
+	    private String root;
+	    // Constructor
+	    public Node(String node) {
+	    	this.root = node;
+	        children = new ArrayList<String>();
+	    }
+
+	    public String getRoot() {
+	        return this.root;
+	    }
+	    
+	    public ArrayList<String> getChildren() {
+	        return children;
+	    }
+
+	    public void addChild(String node) {
+	        children.add(node);
+	    }
+	}
+}
