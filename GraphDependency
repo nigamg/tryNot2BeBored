@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
-
+/**
+	 * graphSolution
+	 * @author nigamg
+	 *
+	 */
 public class GraphSolution {
 	private final static String ARROW = "->";
 	private final static String FIRST_L = "|_ ";
@@ -42,7 +46,7 @@ public class GraphSolution {
 		}
 		
 		System.out.println("==== for given sample input ====");
-		tree.display("A");
+		tree.print("A");
 		String [] testInput = {
 				"A->B",
 				"A->J",  
@@ -93,7 +97,7 @@ public class GraphSolution {
 				}
 			}
 			System.out.println("==== for given test input ====");
-			testTree.display("A");
+			testTree.print("A");
 		
 	}
 	
@@ -140,12 +144,23 @@ public class GraphSolution {
 
 	        return node;
 	    }
-
-	    public void display(String newNode) {
-	        this.display(newNode, ROOT, "", true);
+	    
+	    /**
+	     * print from  node
+	     * @param newNode
+	     */
+	    public void print(String newNode) {
+	        this.print(newNode, ROOT, "", true);
 	    }
 	    
-	    public void display(String newNode, int depth, String prefix, boolean leaf) {
+	    /***
+	     * print other nodes
+	     * @param newNode
+	     * @param depth
+	     * @param prefix
+	     * @param leaf
+	     */
+	    public void print(String newNode, int depth, String prefix, boolean leaf) {
 	        ArrayList<String> children = nodes.get(newNode).getChildren();
 
 	        if (depth == ROOT) {
