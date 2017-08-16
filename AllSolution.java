@@ -12,11 +12,16 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.print.DocFlavor.CHAR_ARRAY;
 
 import org.quickfixj.java4.edu.emory.mathcs.backport.java.util.Arrays;
 
 public class Solution {
 	
+    public final int NO_OF_CHARS = 256;
 	public static PriorityQueue<Integer> minHeap = new PriorityQueue<>();
 	public static PriorityQueue<Integer> maxHeap = new PriorityQueue<Integer>(new Comparator<Integer>() {
 
@@ -45,9 +50,7 @@ public class Solution {
 		}
 		
 	}
-	/****
-  Print substring with longest unique char
-  **/
+	
 	public static int printLongest(int [] input){
 		if (input == null || input.length == 0)
 			return 0;
@@ -72,9 +75,6 @@ public class Solution {
 		return 0;
 	}
 	
-  /**
-  Balancing heaps if there are two
-  **/
 	public static void reBalance(){
 		if(Math.abs(minHeap.size() - maxHeap.size()) > 1){
 			PriorityQueue<Integer> biggerHeap = (minHeap.size() > maxHeap.size()) ? minHeap : maxHeap;
@@ -85,9 +85,6 @@ public class Solution {
 		}
 	}
 	// i<j<k => ai < ak < aj
-  /*
-  finding pattern of indices
-  **/
 	public boolean find132Pattern(int [] nums){
 		if(nums.length < 3)
 			return false;
@@ -1730,6 +1727,204 @@ public class Solution {
 		}
 	}
 	
+	/****
+	 * Check whether it is a sub-set problem
+	 * @param set
+	 * @param n
+	 * @param sum
+	 * @return
+	 */
+	public boolean isSubSetSumProblem(int [] set, int n , int sum){
+		if (sum == 0)
+			return true;
+		
+		if(n == 0 && sum != 0)
+			return false;
+		if(set[n-1] > sum)
+			return isSubSetSumProblem(set, n-1, sum);
+		
+		return isSubSetSumProblem(set, n-1, sum) || isSubSetSumProblem(set, n-1, sum-set[n-1]);
+	}
+	
+	/****
+	 * Longest common subsquence
+	 * @param x
+	 * @param y
+	 * @param m
+	 * @param n
+	 * @return
+	 */
+	public int longestCommonSubSequence(char [] x, char [] y, int m, int n){
+		if (m == 0 || n == 0)
+			return 0;
+		if(x[m-1] ==  y[n-1])
+			return 1+longestCommonSubSequence(x, y, m-1, n-1);
+		return Math.max(longestCommonSubSequence(x, y, m, n-1), longestCommonSubSequence(x, y, m-1, n));
+	}
+	
+	/****
+	 * Longest increasing sub-sequence
+	 * @param arr
+	 * @param n
+	 * @return
+	 */
+	public int longestIncreasingSubSequence(int [] arr, int n){
+		int [] lis = new int [n];
+		int i , j , max = 0;
+		for(i = 0 ; i < n; i++)
+			lis[i] = 1;
+		for(i = 1; i < n ; i++){
+			for (j = 0 ; j < i ; j++){
+				// compute lis in the bottom-up manner
+				if(arr[i] > arr[j] && lis[i] < lis[j]+1){
+					lis[i] = lis[j]+1;
+				}
+			}
+		}
+	
+		for(i =0; i < n ; i++){
+			if(max < lis[i]){
+				max = lis[i];
+			}
+		}
+		return max;
+	}
+	
+	public int longestSubSequenceWithDifferenceOne(int [] arr, int n){
+		int [] lis = new int [n];
+		int i , j , max = 0;
+		for(i = 0 ; i < n; i++)
+			lis[i] = 1;
+		for(i = 1; i < n ; i++){
+			for (j = 0 ; j < i ; j++){
+				// compute lis in the bottom-up manner
+				if(arr[i] == arr[j]+1 || arr[i] == arr[j]-1){
+					lis[i] = Math.max(lis[i], lis[j]+1);
+				}
+			}
+		}
+	
+		for(i =0; i < n ; i++){
+			if(max < lis[i]){
+				max = lis[i];
+			}
+		}
+		return max;
+	}
+	
+	/***
+	 * No adjacent
+	 * @param arr
+	 * @return
+	 */
+	public int maxSumNoAdjacent (int [] arr){
+		int n = arr.length;
+		int incl = arr[0];
+		int excl = 0;
+		int exclNew;
+		int i ;
+		
+		for(i = 1; i < n ; i ++){
+			// current max excluding i
+			exclNew = (incl > excl) ? incl: excl;
+			
+			// current max including i
+			incl = excl + arr[i];
+			excl = exclNew;
+		}
+		return ((incl > excl) ? incl : excl);
+	}
+	
+	public int maxSumNo3Consec(int [] arr){
+		int n = arr.length;
+		
+		int [] sum = new int[n];
+		sum[0] = arr[0];
+		sum[1] = arr[0] + arr[1];
+		sum[2] = Math.max(sum[1], arr[1]+arr[2]);
+		
+		for(int i = 3 ; i < n ; i++){
+			sum[i] = Math.max(Math.max(sum[i-1], sum[i-2]+arr[i]), arr[i]+arr[i-1]+sum[i-3]);
+		}
+		return sum[n-1];
+	}
+	
+	public int maxSumPairWithDifferenceLessThanK(int [] arr, int k){
+		int n =  arr.length;
+		Arrays.sort(arr);
+		
+		int [] dp = new int[n];
+		dp[0] = 0;
+		for(int i = 1; i < n ; i++){
+			dp[i] = dp[i-1];
+			if(arr[i]-arr[i-1] < k){
+				if(i>= 2){
+					dp[i] = Math.max(dp[i], dp[i-2] + arr[i] + arr[i-1]);
+				}else{
+					dp[i] = Math.max(dp[i], arr[i]+arr[i-1]);
+				}
+			}
+		}
+		return dp[n-1];
+	}
+	
+	public static class ProducerConsumer{
+		public static void main(String [] args){
+			BlockingQueue<Object> sharedQueue = new LinkedBlockingQueue<>();
+			
+			Thread prodThread = new Thread(new Solution.Producer(sharedQueue));
+			Thread consThread = new Thread(new Solution.Consumer(sharedQueue));
+			
+			prodThread.start();
+			consThread.start();
+		}
+	}
+	
+	public static class Producer implements Runnable{
+		private final BlockingQueue<Object> sQ;
+		public Producer(BlockingQueue<Object> sharedQ){
+			this.sQ = sharedQ;
+		}
+		
+		@Override
+		public void run() {
+			int i = 0;
+			// TODO Auto-generated method stub
+			System.out.println("Produced " + i);
+			try {
+				sQ.put(i);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	public static class Consumer implements Runnable{
+		private final BlockingQueue<Object> sQ;
+		public Consumer(BlockingQueue<Object> sharedQ){
+			this.sQ = sharedQ;
+		}
+		
+		@Override
+		public void run() {
+			int i = 0;
+			// TODO Auto-generated method stub
+		
+			try {
+				System.out.println("Produced " + this.sQ.take());
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	
+	
+	
 	public Graph cloneGraph(Graph source){
 		if(source == null)
 			return null;
@@ -1759,6 +1954,115 @@ public class Solution {
 		}
 		return hm.get(source);
 	}
+	
+	/***
+	 * Print string with condition
+	 * @param str
+	 * @param ch
+	 * @param count
+	 * @return
+	 */
+	public String printString(String str, char ch, int count){
+		int occ = 0, i ;
+		if (count == 0){
+			return str;
+		}
+		
+		for (i = 0 ; i < str.length(); i ++){
+			if(str.charAt(i) == ch){
+				occ++;
+			}
+			if(occ == count){
+				break;
+			}
+		}
+		return str.substring(i+1);
+	}
+	
+	public int factorial (int n){
+		int fact = 1;
+		for (int i = 2; i <= n ; i++){
+			fact*=n;
+		}
+		return fact;
+	}
+	
+	/***
+	 * returns char  count array
+	 * @param str
+	 * @return
+	 */
+	public int [] getCharCount(String str){
+		int CHAR_ARRAY = 26;
+		int [] count = new int [CHAR_ARRAY];
+		for(char c: str.toCharArray()){
+			count[c-'a']++;
+		}
+		return count;
+	}
+	
+	public boolean areKAnagrams(String str1, String str2, int k ){
+		int [] count1 = this.getCharCount(str1);
+		int [] count2 = this.getCharCount(str2);
+		
+		int count = 0;
+		for(int i = 0 ; i < 26; i ++){
+			if(count1[i] > count2[i]){
+				count+=Math.abs(count1[i]-count2[i]);
+			}
+		}
+		return (count <= k);
+	}
+	
+	public int countNumberOfSquares(int player, int row, int col, int dirX, int dirY){
+		int winR1 = 0, winR2 = 0, winC1= 0, winC2=0;
+		int ct = 1; // number of the pieces in a row belonging to the player
+		int [][] board = null;
+		int r, c;
+		r = row+dirX;
+		c = col+dirY;
+		
+		while(r >=0  && r < 13 && c >=0 &&  c< 13 && board[r][c] == player){
+			ct++;
+			r = row+dirX;
+			c = col = dirY;
+		}
+		winR1 =  r-dirX;
+		winC1 = c -dirY;
+		
+		r = row-dirX;
+		c = col-dirY;
+		
+		while(r>=0 && r< 13 && c >= 0 && c< 13 && board[r][c] == player){
+			r = row+dirX;
+			c = col+dirY;
+			ct++;
+		}
+		
+		winR2 = r+dirX;
+		winC2 = r+dirY;
+		
+		return ct;
+	}
+	
+	private boolean isWinnerInBoard(int row, int col){
+		int player = 3;
+		if(countNumberOfSquares(player, row, col, 1, 0) >= 5)
+			return true;
+		
+		if(countNumberOfSquares(player, row, col, 0, 1) >= 5)
+			return true;
+		
+		if(countNumberOfSquares(player, row, col, 1, -1) >= 5)
+			return true;
+		
+		if(countNumberOfSquares(player, row, col, 1, 1) >= 5)
+			return true;
+		
+		return false;
+	}
+	
+	// Distinct permutation: !n/!a!b!c
 	
 	public class Graph{
 		int data;
